@@ -1,0 +1,10 @@
+Changes
+frbr.xs
+Makefile.PL
+MANIFEST
+ppport.h
+README
+t/frbr.t
+fallback/const-c.inc
+fallback/const-xs.inc
+lib/frbr.pm
