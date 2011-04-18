@@ -25,7 +25,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw(
-    get_work_attrs get_expression_attrs get_manifestation_attrs get_item_attrs get_person_attrs get_corporate_body_attrs get_concept_attrs get_object_attrs get_event_attrs get_place_attrs get_attrs %Entry_Attrs
+    get_work_attrs get_expression_attrs get_manifestation_attrs get_item_attrs get_person_attrs get_corporate_body_attrs get_concept_attrs get_object_attrs get_event_attrs get_place_attrs get_attrs %Entry_Attrs get_relation_type
 );
 
 our $VERSION = '0.01';
@@ -200,6 +200,75 @@ sub get_corporate_body_attrs{
     );
 
     return %Corporate_Body_Attrs;
+}
+
+#relationship type
+sub get_relation_type_desc {
+
+    my %relation_type_desc;
+    $relation_type_desc{'whole/part'}         = ['has part', 'part of'];
+    $relation_type_desc{'reconfiguration'}    = ['has reconfiguration', 'a reconfiguration of'];
+    $relation_type_desc{'reproduction'}       = ['has a reproduction', 'a reproduction of '];
+    $relation_type_desc{'alternate'}          = ['has an alternate', 'an alternate to '];
+    $relation_type_desc{'abridgement'}        = ['has an abridgement', 'an abridgement of'];
+    $relation_type_desc{'revision'}           = ['has a revision', 'a revision of '];
+    $relation_type_desc{'translation'}        = ['has a translation', 'a translation of '];
+    $relation_type_desc{'arrangement'}        = ['has an arrangement', 'an arrangement of '];
+    $relation_type_desc{'successor'}          = ['has a successor', 'a successor to'];
+    $relation_type_desc{'supplement'}         = ['has a supplement', 'supplements '];
+    $relation_type_desc{'complement'}         = ['has a complement', 'complements'];
+    $relation_type_desc{'summary'}            = ['has a summary', 'a summary of '];
+    $relation_type_desc{'adaptation'}         = ['has adaptation', 'an adaptation of'];
+    $relation_type_desc{'transformation'}     = ['has a transformation', 'a transformation of '];
+    $relation_type_desc{'imitation'}          = ['has an imitation', 'an imitation of '];
+    $relation_type_desc{'create'}             = ['creator', 'creator of'];
+    $relation_type_desc{'realize'}            = ['realizer', 'realizer of'];
+    $relation_type_desc{'produce'}            = ['producer', 'producer of'];
+    $relation_type_desc{'own'}                = ['owner', 'owner of'];
+    $relation_type_desc{'emboy'}              = ['embodiment', 'embodiment of'];
+    $relation_type_desc{'exemplify'}          = ['examplar', 'examplar of'];
+    return %relation_type_desc;
+}
+
+#relationship type with attr
+sub get_relation_type {
+    my %relation_type;
+    $relation_type{'item-item'} = ['whole/part', 'reconfiguration', 'reproduction'];
+    
+    $relation_type{'manifestation-menifestation'} = ['whole/part', 'reproduction', 'alternate'];
+    
+    $relation_type{'expression-expression'} = ['whole/part', 'abridgement', 'revision', 'translation', 'arrangement'];
+    
+    $relation_type{'work-work'} = ['whole/part', 'successor', 'supplement', 'complement', 'summary', 'adaptation', 'transformation', 'imitation'];
+
+    $relation_type{'manifestation-item'} = ['reproduction'];
+    
+    $relation_type{'expression-work'} = ['successor', 'supplement', 'complement', 'summary', 'adaptation', 'transformation', 'imitation'];
+    
+    $relation_type{'expression-work-expression'} = ['successor', 'supplement', 'complement', 'summary', 'adaptation', 'transformation', 'imitation'];
+    
+    $relation_type{'person-work'} = ['create', 'realize', 'produce', 'own'];
+
+    $relation_type{'corporate_body-work'} = ['create', 'realize', 'produce', , 'own'];
+    
+    $relation_type{'person-expression'} = ['create', 'realize', 'produce', 'own'];
+    
+    $relation_type{'corporate_body-expression'} = ['create', 'realize', 'produce', 'own'];
+    
+    $relation_type{'person-manifestation'} = ['create', 'realize', 'produce', 'own'];
+    
+    $relation_type{'corporate_body-manifestation'} = ['create', 'realize', 'produce', 'own'];
+    
+    $relation_type{'person-item'} = ['create', 'realize', 'produce', 'own'];
+    
+    $relation_type{'corporate_body-item'} = ['create', 'realize', 'produce', 'own'];
+    
+    $relation_type{'work-expression'} = ['realize'];
+    
+    $relation_type{'expression-manifestation'} = ['emboy'];
+    
+    $relation_type{'manifestation-item'} = ['exemplify'];
+    return %relation_type;
 }
 
 sub get_concept_attrs{
