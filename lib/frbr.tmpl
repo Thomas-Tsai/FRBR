@@ -1,0 +1,85 @@
+<html>
+<head><title>FRBR Framework test</title></head>
+<body>
+<table border=1>
+<tr>
+<td>
+<TMPL_IF NAME="work">
+<b>Work</b>
+<TMPL_ELSE>
+Work
+</TMPL_IF>
+<TMPL_IF NAME="Expression">
+<b>Expression</b>
+<TMPL_ELSE>
+Expression
+</TMPL_IF>
+<TMPL_IF NAME="Manifestation">
+<b>Manifestation</b>
+<TMPL_ELSE>
+Manifestation
+</TMPL_IF>
+<TMPL_IF NAME="Item">
+<b>Item</b>
+<TMPL_ELSE>
+Item
+</TMPL_IF>
+<TMPL_IF NAME="Person">
+<b>Person</b>
+<TMPL_ELSE>
+Person
+</TMPL_IF>
+<TMPL_IF NAME="Concept">
+<b>Concept</b>
+<TMPL_ELSE>
+Concept
+</TMPL_IF>
+</td>
+</tr>
+<tr>
+<td>relation map</td>
+</tr>
+<tr>
+<td>
+<!--entry layer-->
+<table border=1 width=100%>
+<tr>
+<td colspan=3>Work -> Expression -> Manifestation -> Item </td>
+</tr>
+<tr>
+<td colspan=3>Type: </td>
+</tr>
+<tr>
+<td>
+<table>
+<tr><td>CONCEPT</td><td rowspan=4>has as subject</td></tr>
+<tr><td>OBJECT</td></tr>
+<tr><td>EVENT</td></tr>
+<tr><td>PLACE</td></tr>
+</table>
+</td>
+<td>
+<TMPL_LOOP NAME="ATTR">
+<TMPL_VAR NAME="entry_attr"> : <TMPL_VAR NAME="entry_attr_value"> <br />
+</TMPL_LOOP>
+</td>
+<td>
+<table>
+<tr><td rowspan=2>is {owned | produced | realized | created} by</td><td>PERSON</td></tr>
+<tr><td>CORPROATE BODY</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td colspan=3>Type: </td>
+</tr>
+<tr>
+<td colspan=3>Work -> Expression -> Manifestation -> Item </td>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>
