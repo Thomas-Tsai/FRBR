@@ -10,21 +10,23 @@ use HTML::Template;
 my $tmpl = HTML::Template->new(filename => 'frbr.tmpl', debug => 1);
 
 # global variant
-my @Entry_G1 = qw(work expression manifestation item);
-my @Entry_G2 = qw(person corporate_body);
-my @Entry_G3 = qw(concept object event place);
+my @Entry_G1 = qw(work expression manifestation item);	# right/left
+my @Entry_G2 = qw(person corporate_body);		# down
+my @Entry_G3 = qw(concept object event place);		# up
 my @Entry = [@Entry_G1, @Entry_G2, @Entry_G3];
 my $current_entry = param('entry');
 $current_entry = 'work' if (param('entry') eq '');
 
-
-# CMD include 'create || insert || edit || delete ||browse(default)'
+# CMD include 'create || insert || edit || delete || browse(default)'
 my $CMD = param('CMD');
 $CMD = 'browse' if (param('CMD') eq '');
 
+# RT_CMD include 'add || delete || NONE'
+my $RT_CMD = param('RT_CMD');
+$RT_CMD = 'NONE' if (param('RT_CMD') eq '');
+
 my %entry;
 my $t = tie(%entry, 'Tie::IxHash');
-%entry = get_attrs($current_entry);
 
 my %db_entry_map = (
     'work'              => 'Work_Attrs',
@@ -32,225 +34,466 @@ my %db_entry_map = (
     'manifestation'     => 'Manifestation_Attrs',
     'item'              => 'Item_Attrs',
     'person'            => 'Person_Attrs',
-    'corporate_body'    => 'Corporate_bod_Attrs',
+    'corporate_body'    => 'Corporate_body_Attrs',
     'concept'           => 'Concept_Attrs',
     'object'            => 'Object_Attrs',
     'event'             => 'Event_Attrs',
     'place'             => 'Place_Attrs'
 );
-
-my $table = $db_entry_map{$current_entry};
-$tmpl->param(WORK => 1);
+my $id = param('ID');
+$id = 'MAX' if (param('ID') eq '');
+$tmpl->param(ID => $id);
 
 # Functions #
 
 # get_table_relation_type
-sub get_table_relation_type(){
-    my %table_type;
+sub get_entry_relation_type {
+    my $entry = $_[0];
+
+    my %entry_type;
     my %rt = get_relation_type();
-    my $entry = $table;
-    $entry =~ s/_Attrs//g;
     foreach my $type (keys(%rt)){
-        if ($type =~ /$entry/i){
-            $table_type{$type} = $rt{$type};
-        }
+	if ($type =~ /$current_entry/i){
+	    @{$entry_type{$type}} = @{$rt{$type}};
+	}
     }
-    return %table_type;
+    return %entry_type;
+}
+
+# get desc for relation type
+sub get_left_relation_type_desc {
+    my $check_type = $_[0]; ## relation type
+
+    my %type_desc = get_relation_type_desc();
+    foreach my $type (keys(%type_desc)){
+	if ($type eq $check_type){
+	    return $type_desc{$type}[0];
+	}
+    }
+}
+
+sub get_right_relation_type_desc {
+    my $check_type = $_[0]; ## relation type
+
+    my %type_desc = get_relation_type_desc();
+    foreach my $type (keys(%type_desc)){
+	if ($type eq $check_type){
+	    return $type_desc{$type}[1];
+	}
+    }
+}
+
+# filter left relationship
+sub get_left_relation {
+    my $entry = $_[0];
+    my ($left, $right) = split('-', $entry);
+    return $left;
+}
+sub get_right_relation {
+    my $entry = $_[0];
+    my ($left, $right) = split('-', $entry);
+    return $right;
 }
 
 # create_entry_attrs_form()
 sub create_entry_attrs_form{
+    my @edit_data = ();
     foreach my $attr (keys(%entry)){
-        #print p($entry{$attr}, textfield($attr,''));
+	push(@edit_data, {entry_attr => $attr});
     }
-    #print "Relation type:<br /\>\n";
-    my %table_type = get_table_relation_type();
-    foreach my $type (keys(%table_type)){
-        #print p($type);
-        #print scrolling_list($type, $table_type{$type});
-    }
-
+    $tmpl->param(ATTR => \@edit_data);
 }
 
 # form to edit attrs
 sub edit_entry_attrs_form{
     my $row = $_[0];
+    my @edit_data = ();
     foreach my $attr (keys(%entry)){
-        #print p($entry{$attr}, textfield($attr.'_'.$row->{'ID'}, $row->{$attr}));
+	push(@edit_data, {entry_attr => $attr, entry_attr_value => $row->{$attr}});
     }
-    #print "Relation type:<br /\>\n";
-    my %table_type = get_table_relation_type();
-    foreach my $type (keys(%table_type)){
-        #print p($type);
-        #print scrolling_list($type, $table_type{$type});
-    }
-
-    #print hidden('ID', $row->{'ID'});
-
+    $tmpl->param(ATTR => \@edit_data);
 }
 
-# form header
-sub base_form_header{
-    #print start_form("post", "frbr.pl", "");
-    #print popup_menu('entry', @Entry, $current_entry);
-    if ($CMD eq 'create'){
-        #print submit('CMD','insert');
-    } else {
-        #print submit("CMD", "create");
-    }
-    #print submit("CMD", "browse");
-    if ($CMD eq 'edit'){
-        #print submit('CMD','update');
-    } else {
-        #print submit("CMD", "edit");
-    }
-    #print submit("CMD", "delete");
-    #print submit("CMD", "search");
-}
-
-# form footer
-sub base_form_footer{
-    #print end_form();
-}
-
-
-# main
-# FRBR Group
-sub main(){
-
-# Database Connect
-my ($host, $database, $user, $password) = ('localhost', 'frbr', 'root', 'okok7480');
-my $dbh = DBI->connect("DBI:mysql:database=$database;host=$host",$user,$password);
-
-# process your CMD
-
-# print html and header
-#print header(),start_html();
-base_form_header();
-
-# CMD for create entry
-if ($CMD eq 'create'){
-    create_entry_attrs_form();
-
-# CMD for load form to edit entry attrs
-} elsif ($CMD eq 'edit') {
-    my @ID = param('ID');
-
-    foreach my $ID (@ID){
-        # retrive data from database
-        my $sth = $dbh->prepare("SELECT * FROM $table where ID=$ID");
-        $sth->execute();
-        while (my $ref = $sth->fetchrow_hashref()) {
-            edit_entry_attrs_form($ref);
-        }
-        $sth->finish();
-    }
-
-# CMD for update data to database
-} elsif ($CMD eq 'update') {
-    my @ID = param('ID');
-    
-    foreach my $ID (@ID){
-        my %attrs;
-        my @update_data;
-        my $update_data;
-
-        foreach my $attr (keys(%entry)){ 
-            next if ($attr eq "CMD");
-            my $value_id = $attr.'_'.$ID;
-            $attrs{$attr} = "'".param($value_id)."'" if (param($value_id) ne "");
-            #print ("$ID column $attr = ".param($value_id)."\n</br>");
-        }
-        
-        foreach my $attr_key ( keys ( %attrs ) ) {
-            push ( @update_data, "$attr_key=$attrs{$attr_key}" );
-        }
-        $update_data = join (',', @update_data);
-
-        my $sql_statement = "UPDATE $table SET $update_data WHERE ID=$ID";
-        my $sth = $dbh->prepare($sql_statement);
-        $sth->execute();
-        $sth->finish();
-    }
-
-# CMD for new data to database
-} elsif ($CMD eq 'insert') {
-
-    # progress for all param from web form
-    my %attrs;
-    foreach my $attr (keys(%entry)){ 
-        next if ($attr eq "CMD");
-        $attrs{$attr} = "'".param($attr)."'" if (param($attr) ne "");
-        #print ("The column $attr = ".param($attr)."\n</br>");
-    }
-
-    foreach my $attr_key(keys(%attrs)){
-        #print ("The column $attr_key = $attrs{$attr_key} will be insert/update\n</br>");
-    }
-    my $sql_statement;
-    # prepare column and values
-    my $tbl_column = join(',', keys(%attrs));
-    my $tbl_values = join(',', values(%attrs));
-    $sql_statement = "INSERT INTO $table ($tbl_column) VALUES ($tbl_values)";
-
-    # run sql statement
-    my $sth = $dbh->prepare($sql_statement);
-    $sth->execute();
-    $sth->finish();
-
-# CMD for browse all entry attrs
-} elsif ($CMD eq 'delete') {
-    my @ID = param('ID');
-    foreach my $id (@ID){
-        my $sth = $dbh->prepare("DELETE FROM $table WHERE ID=$id");
-        $sth->execute();
-        $sth->finish();
-    }
-# CMD for browse all entry attrs
-} elsif ($CMD eq 'browse') {
-
-    my $id = param('ID');
-    # retrive all data from database
+# retrive data
+sub retrive_entry_id_data {
+    my $dbh = $_[0];
+    my $table = $db_entry_map{$current_entry};
     my $sth = $dbh->prepare("SELECT * FROM $table WHERE ID=$id");
     $sth->execute();
-    #my @td_data = ();
     my @attr_data = ();
     while (my $ref = $sth->fetchrow_hashref()) {
-     #   my @attr_values = ();
-        foreach my $attr (keys (%entry)){
-            my %row_data;
-            $row_data{'entry_attr'} = $attr;
-            if ($ref->{$attr}){
-     #           push (@attr_values, $ref->{$attr});
-                $row_data{'entry_attr_value'} = $ref->{$attr};
-            } else {
-     #           push (@attr_values, ' ');    
-                $row_data{'entry_attr_value'} = ' ';
-            }
-            push(@attr_data, \%row_data);
-        }
-        #unshift (@attr_values, $ref->{'ID'});
-        #push (@td_data, Tr(td([checkbox('ID', 0, $ref->{'ID'}, ''), @attr_values])));
+	#push(@attr_data, {entry_attr => 'ID', entry_attr_value => $id});
+	foreach my $attr (keys (%entry)){
+	    my %row_data;
+	    $row_data{'entry_attr'} = $attr;
+	    if ($ref->{$attr}){
+		$row_data{'entry_attr_value'} = $ref->{$attr};
+	    } else {
+		$row_data{'entry_attr_value'} = ' ';
+	    }
+	    push(@attr_data, \%row_data);
+	}
 
     }
     $sth->finish();
-    #print table( {-border=>"1"},
-          #Tr(td(['', 'ID', values %entry])),
-          #@td_data,
-          #);
     $tmpl->param(ATTR => \@attr_data);
 }
 
-base_form_footer();
-
-# send the obligatory Content-Type and print the template output
-print "Content-Type: text/html\n\n", $tmpl->output;
-#print end_html();
-# Database disconnect
-$dbh->disconnect();
-
-# end of main
+# form header
+sub ProcessCMD{
+    my @command;
+    if ($CMD eq 'create'){
+	push (@command, {CMD => 'insert'});
+    } else {
+	push(@command, {CMD => 'create'});
+    }
+    push(@command, {CMD => 'browse'});
+    if ($CMD eq 'edit'){
+	push(@command, {CMD => 'update'});
+    } else {
+	push(@command, {CMD => 'edit'});
+    }
+    push(@command, {CMD => 'delete'}, {CMD => 'search'});
+    $tmpl->param(command => \@command);
 }
 
+# get table max id number
+sub get_table_max_id {
+    my $dbh = $_[0];
+    my $table = $_[1];
+
+    my $sth = $dbh->prepare("SELECT MAX(ID) FROM $table");
+    $sth->execute();
+    my @result = $sth->fetchrow_array();
+    my $id = $result[0];
+
+    return $id;
+}
+
+# change id
+sub update_id {
+    my $dbh = $_[0];
+    my $new_id = $_[1];
+    if ($new_id eq 'MAX'){
+	my $table = $db_entry_map{$current_entry};
+	my $maxid = get_table_max_id($dbh, $table);
+	$tmpl->param(ID => $maxid);
+	$id = $maxid;
+    } else {
+	$id = $new_id;
+	$tmpl->param(ID => $new_id);
+    }
+}
+
+sub update_entry {
+    my $new_entry = $_[0];
+    $current_entry = $new_entry;
+    %entry = get_attrs($current_entry);
+    $tmpl->param(ENTRY => $new_entry);
+    $tmpl->param(Work => 1) if $current_entry eq 'work';
+    $tmpl->param(Expression => 1) if $current_entry eq 'expression';
+    $tmpl->param(Manifestation => 1) if $current_entry eq 'manifestation';
+    $tmpl->param(Person => 1) if $current_entry eq 'person';
+    $tmpl->param(Corporate_Body => 1) if $current_entry eq 'corporate_body';
+    $tmpl->param(Event => 1) if $current_entry eq 'event';
+    $tmpl->param(Place => 1) if $current_entry eq 'place';
+    $tmpl->param(Concept => 1) if $current_entry eq 'concept';
+    $tmpl->param(Object => 1) if $current_entry eq 'object';
+}
+
+# handle relation data
+
+sub create_temp_entry {
+    my $dbh = $_[0];
+    my $temp_entry = $_[1];
+
+    my $table = $db_entry_map{$temp_entry};
+    my $sql_statement = "INSERT INTO $table (`ID`) VALUES ('0')";
+    my $sth = $dbh->prepare($sql_statement);
+    $sth->execute();
+    $sth->finish();
+    
+    return get_table_max_id($dbh, $table);
+}
+
+sub add_relation_data {
+    my ($dbh, $prev_entry ,$prev_id, $next_entry, $next_id, $relation_type) = @_;
+    my $sql_statement = "INSERT INTO relation (`entry_left`,`entry_left_id`, `entry_right`, `entry_right_id`, `relation_type`) VALUES ('$prev_entry' ,'$prev_id', '$next_entry', '$next_id', '$relation_type')";
+    my $sth = $dbh->prepare($sql_statement);
+    $sth->execute();
+    $sth->finish();
+}
+
+sub relation_admin {
+    my $dbh = $_[0];
+    if ($RT_CMD ne 'NONE'){
+	my $prev_entry = param('P_ENTRY');
+	my $prev_id = param('P_ID');
+	if ($RT_CMD eq 'add'){
+	    my ($relation_type, $next_entry )= split(':',param('selected_type'));
+	    my $next_id = create_temp_entry($dbh, $next_entry);
+	    add_relation_data($dbh, $prev_entry ,$prev_id, $next_entry, $next_id, $relation_type);
+	    update_id($dbh, $next_id);
+	    update_entry($next_entry);
+	    $CMD='edit';
+	} elsif ($RT_CMD eq 'delete'){
+	    # delete_relation_data();
+	}
+    }
+}
+
+sub get_relation_db {
+    my ($dbh, $entry, $id, $link) = @_;
+    my @rt_data;
+    my $sql_statement;
+
+    if ($link eq 'right'){
+	$sql_statement = "select `entry_right`, `entry_right_id`, `relation_type` from relation where `entry_left`='$entry' and `entry_left_id`=$id";
+    } elsif ( $link eq 'left' ) {
+	$sql_statement = "select `entry_left`, `entry_left_id`, `relation_type` from relation where `entry_right`='$entry' and `entry_right_id`=$id";
+    }
+    my $sth = $dbh->prepare($sql_statement);
+    $sth->execute();
+    while (my $ref = $sth->fetchrow_hashref()) {
+	if ($link eq 'right'){
+	    push (@rt_data, {entry => $ref->{entry_right}, id => $ref->{entry_right_id}, type => $ref->{relation_type}});
+	} elsif ( $link eq 'left'){
+	    push (@rt_data, {entry => $ref->{entry_left}, id => $ref->{entry_left_id}, type => $ref->{relation_type}});
+	}
+    }
+    $sth->finish();
+    return @rt_data;
+}
+
+sub get_type_for_new_relation {
+    my ($entry, $link) = @_;
+    # set/get relation type
+    my %rt = get_entry_relation_type($entry);
+    #my %frt = filter_entry_relation(\%rt, \@Entry_G1, \@Entry_G1);
+    my @tmpl_data;
+
+    # get relation for new entry
+    foreach my $rt_entry (keys(%rt)){
+	
+	my $link_relation;
+	if ($link eq "right") {
+	    $link_relation = get_left_relation($rt_entry);
+	} elsif ($link eq "left") {
+	    $link_relation = get_right_relation($rt_entry);
+	}
+
+	if ($link_relation =~ /$entry/i) {
+	    foreach my $type_of_entry (@{$rt{$rt_entry}}) {
+		my %tmpl_desc;
+		$tmpl_desc{'RT_TYPE'} = $type_of_entry;
+		if ($link eq 'right'){
+		    $tmpl_desc{'RT_NEXT'} = get_right_relation($rt_entry);
+		    $tmpl_desc{'RT_DESC'} = get_left_relation_type_desc($type_of_entry);
+		} elsif ($link eq 'left'){
+		    $tmpl_desc{'RT_NEXT'} = get_left_relation($rt_entry);
+		    $tmpl_desc{'RT_DESC'} = get_right_relation_type_desc($type_of_entry);
+		}
+		push(@tmpl_data, \%tmpl_desc);
+	   }
+	}
+    }
+    return @tmpl_data;
+}
+
+sub get_entry_col {
+    my ($dbh, $entry, $entry_id, $col) = @_;
+    my $table = $db_entry_map{$entry};
+    my $sql_statement = "select `$col` from $table where `ID`=$entry_id";
+    my $sth = $dbh->prepare($sql_statement);
+    $sth->execute();
+    my @result = $sth->fetchrow_array();
+    return $result[0];;
+}
+
+sub default_column {
+    my $entry = $_[0];
+    return "title_work" if $entry eq 'work';
+    return "title_expression" if $entry eq 'expression';
+    return "title_manifestation" if $entry eq 'manifestation';
+    return "item_identifier" if $entry eq 'item';
+    return "name" if $entry eq 'person';
+    return "name" if $entry eq 'corporate_body';
+    return "term" if $entry eq 'concept';
+    return "term" if $entry eq 'object';
+    return "term" if $entry eq 'event';
+    return "term" if $entry eq 'place';
+}
+
+sub get_title_from_entry_id {
+    my ($dbh, $entry, $id) = @_;
+
+    return get_entry_col($dbh, $entry, $id, default_column($entry));
+}
+
+sub get_current_relation{
+    my ($dbh, $current_entry, $id, $link) = @_;
+    my @entry_link;
+    my @exist_rt;
+
+    @exist_rt = get_relation_db($dbh, $current_entry, $id, $link);
+    foreach my $rt (@exist_rt){
+	my %data;
+	$data{'entry'} = $rt->{'entry'};
+	$data{'id'} = $rt->{'id'};
+	#data{'type'} = $rt->{'type'};
+	$data{'desc'} = get_right_relation_type_desc($rt->{'type'});
+	$data{'title'} = get_title_from_entry_id($dbh, $rt->{'entry'}, $rt->{'id'});
+	push(@entry_link, \%data);
+    }
+    return @entry_link;
+}
+
+# main
+# FRBR Group
+sub main {
+
+    # Database Connect
+    my ($host, $database, $user, $password) = ('localhost', 'frbr', 'root', 'okok7480');
+    my $dbh = DBI->connect("DBI:mysql:database=$database;host=$host",$user,$password);
+
+    update_entry($current_entry);
+    relation_admin($dbh);
+    # process your CMD
+    ProcessCMD();
+
+    my $table = $db_entry_map{$current_entry};
+    if ($CMD eq 'create') {  # CMD for create entry #
+
+	$tmpl->param(tmpl_create => 1);
+	create_entry_attrs_form();
+
+    } elsif ($CMD eq 'edit') {	# CMD for load form to edit entry attrs #
+
+	$tmpl->param(tmpl_edit => 1);
+	# retrive data from database
+	my $sth = $dbh->prepare("SELECT * FROM $table where ID=$id");
+	$sth->execute();
+	while (my $ref = $sth->fetchrow_hashref()) {
+	    edit_entry_attrs_form($ref);
+	}
+	$sth->finish();
+
+    } elsif ($CMD eq 'update') { # CMD for update data to database #
+
+	my %attrs;
+	my @update_data;
+	my $update_data;
+
+	foreach my $attr (keys(%entry)){ 
+	    $attrs{$attr} = "'".param($attr)."'" if (param($attr) ne "");
+	}
+
+	foreach my $attr_key ( keys ( %attrs ) ) {
+	    push ( @update_data, "$attr_key=$attrs{$attr_key}" );
+	}
+	$update_data = join (',', @update_data);
+
+	my $sql_statement = "UPDATE $table SET $update_data WHERE ID=$id";
+	my $sth = $dbh->prepare($sql_statement);
+	$sth->execute();
+	$sth->finish();
+
+	$tmpl->param(tmpl_browse => 1);
+	# retrive data from database
+	retrive_entry_id_data($dbh);
+
+    } elsif ($CMD eq 'insert') {    # CMD for new data to database#
+
+	#generate UUID
+	#my $ug    = new Data::UUID;
+	#my $uuid  = $ug->create();
+	#my $uuid_str = $ug->to_string( $uuid );
+
+	# progress for all param from web form
+	my %attrs;
+	foreach my $attr (keys(%entry)){ 
+	    $attrs{$attr} = "'".param($attr)."'" if (param($attr) ne "");
+	}
+
+	my @idsql;
+	while (my($k, $v) = each(%attrs)) {
+	    my $sql = $k.'='.$v;
+	    push(@idsql, $sql);
+	}
+	my $sql_statement2 = join(' and ', @idsql);
+
+	my $sql_statement;
+	# prepare column and values
+	my $tbl_column = join(',', keys(%attrs));
+	my $tbl_values = join(',', values(%attrs));
+	$sql_statement = "INSERT INTO $table ($tbl_column) VALUES ($tbl_values)";
+
+	# run sql statement
+	my $sth = $dbh->prepare($sql_statement);
+	$sth->execute();
+	$sth->finish();
+
+	# get new ID 
+	# fix me in the future, using UUID
+	$sql_statement = "select ID from  $table where $sql_statement2";
+	$sth = $dbh->prepare($sql_statement);
+	$sth->execute();
+	my $result = $sth->fetchrow_hashref();
+	update_id($dbh, $result->{ID});
+
+	$tmpl->param(tmpl_browse => 1);
+	# retrive data from database
+	retrive_entry_id_data($dbh);
+
+    } elsif ($CMD eq 'delete') { # CMD for browse all entry attrs #
+	my $sth = $dbh->prepare("DELETE FROM $table WHERE ID=$id");
+	$sth->execute();
+	$sth->finish();
+
+    } elsif ($CMD eq 'browse') { # CMD for browse all entry attrs #
+
+	$tmpl->param(tmpl_browse => 1);
+	# retrive data from database
+	update_id($dbh, 'MAX') if ($id eq 'MAX');
+	retrive_entry_id_data($dbh);
+
+    }
+
+    # relation for G1 (left and rigth)
+    my @left_data = get_type_for_new_relation($current_entry, 'left');
+    $tmpl->param(LEFT_TYPE_DESC_LOOP => \@left_data);
+
+    my @right_data = get_type_for_new_relation($current_entry, 'right');
+    $tmpl->param(RIGHT_TYPE_DESC_LOOP => \@right_data);
+
+    # get exist relation type and entry
+    my @left_entry_link = get_current_relation($dbh, $current_entry, $id, 'left');
+    $tmpl->param(LEFT_ENTRY_LOOP => \@left_entry_link);
+
+    my @right_entry_link = get_current_relation($dbh, $current_entry, $id, 'right');
+    $tmpl->param(RIGHT_ENTRY_LOOP => \@right_entry_link);
+
+    # relation for G2 (down)
+    my @down_data = get_type_for_new_relation($current_entry, 'down');
+    #$tmpl->param(DOWN_TYPE_DESC_LOOP => \@left_data);
+
+    my @down_entry_link = get_current_relation($dbh, $current_entry, $id, 'down');
+    #$tmpl->param(DOWN_ENTRY_LOOP => \@down_entry_link);
+
+    # relation for G3 (up)
+    my @up_data = get_type_for_new_relation($current_entry, 'up');
+    #$tmpl->param(UP_TYPE_DESC_LOOP => \@up_data);
+
+    my @up_entry_link = get_current_relation($dbh, $current_entry, $id, 'up');
+    #$tmpl->param(UP_ENTRY_LOOP => \@up_entry_link);
+
+    # Database disconnect
+    $dbh->disconnect();
+
+    # send the obligatory Content-Type and print the template output
+    print "Content-Type: text/html\n\n", $tmpl->output;
+
+    # end of main
+}
 
 main ();
