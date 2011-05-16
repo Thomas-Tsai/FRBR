@@ -247,7 +247,7 @@ sub get_relation_db {
     my @rt_data;
     my $sql_statement;
 
-    if ($link eq 'right'){
+    if (($link eq 'right') || ($link eq 'down') || ($link eq 'up')){
 	$sql_statement = "select `entry_right`, `entry_right_id`, `relation_type` from relation where `entry_left`='$entry' and `entry_left_id`=$id";
     } elsif ( $link eq 'left' ) {
 	$sql_statement = "select `entry_left`, `entry_left_id`, `relation_type` from relation where `entry_right`='$entry' and `entry_right_id`=$id";
@@ -255,7 +255,7 @@ sub get_relation_db {
     my $sth = $dbh->prepare($sql_statement);
     $sth->execute();
     while (my $ref = $sth->fetchrow_hashref()) {
-	if ($link eq 'right'){
+	if (($link eq 'right') || ($link eq 'down') || ($link eq 'up')){
 	    push (@rt_data, {entry => $ref->{entry_right}, id => $ref->{entry_right_id}, type => $ref->{relation_type}});
 	} elsif ( $link eq 'left'){
 	    push (@rt_data, {entry => $ref->{entry_left}, id => $ref->{entry_left_id}, type => $ref->{relation_type}});
@@ -388,13 +388,30 @@ sub get_current_relation{
 
     @exist_rt = get_relation_db($dbh, $current_entry, $id, $link);
     foreach my $rt (@exist_rt){
-	my %data;
-	$data{'entry'} = $rt->{'entry'};
-	$data{'id'} = $rt->{'id'};
-	#data{'type'} = $rt->{'type'};
-	$data{'desc'} = get_right_relation_type_desc($rt->{'type'});
-	$data{'title'} = get_title_from_entry_id($dbh, $rt->{'entry'}, $rt->{'id'});
-	push(@entry_link, \%data);
+	my @filter;
+	my $found = 0;
+	if ($link eq 'right') {
+	    @filter = @Entry_G1;
+	} elsif ($link eq 'up'){
+	    @filter = @Entry_G3;
+	} elsif ($link eq 'down'){
+	    @filter = @Entry_G2;
+	}
+	foreach my $grt (@filter) {
+	    if ($rt->{'entry'} =~ /$grt/){
+		$found = 1;
+		last;
+	    }
+	}
+	if ($found == 1){
+	    my %data;
+	    $data{'entry'} = $rt->{'entry'};
+	    $data{'id'} = $rt->{'id'};
+	    #data{'type'} = $rt->{'type'};
+	    $data{'desc'} = get_right_relation_type_desc($rt->{'type'});
+	    $data{'title'} = get_title_from_entry_id($dbh, $rt->{'entry'}, $rt->{'id'});
+	    push(@entry_link, \%data);
+	}
     }
     return @entry_link;
 }
