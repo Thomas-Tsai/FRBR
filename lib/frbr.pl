@@ -264,26 +264,65 @@ sub get_relation_db {
     $sth->finish();
     return @rt_data;
 }
+sub filter_entry_relation {
+    my ($ref_rt, $ref_ga, $ref_gb) = @_;
+    my %entry_filtered;
+    my @k = keys(%$ref_rt);
 
+    foreach my $rt_key (keys(%$ref_rt)) {
+        my $found_a = 0;
+        my $found_b = 0;
+        my($rta, $rtb) = split('-', $rt_key);
+        foreach my $ga (@{$ref_ga}){
+            if ($rta =~/$ga/){
+                $found_a = 1;
+                last;
+            }
+	}
+        foreach my $gb (@{$ref_gb}){
+            if ($rtb =~ /$gb/){
+                $found_b = 1;
+                last;
+            }
+	}
+	if (($found_a == 1) && ($found_b == 1)){
+	    @entry_filtered{$rt_key} = @$ref_rt{$rt_key};
+	}
+    }
+    return %entry_filtered;
+
+}
 sub get_type_for_new_relation {
     my ($entry, $link) = @_;
     # set/get relation type
     my %rt = get_entry_relation_type($entry);
-    #my %frt = filter_entry_relation(\%rt, \@Entry_G1, \@Entry_G1);
+    my %frt;
     my @tmpl_data;
+    if (($link eq 'left') || ($link eq 'right')){
+	%frt = filter_entry_relation(\%rt, \@Entry_G1, \@Entry_G1);
+    } elsif ($link eq 'down'){
+	%frt = filter_entry_relation(\%rt, \@Entry_G2, \@Entry_G1);
+    } elsif($link eq 'up'){
+	%frt = filter_entry_relation(\%rt, \@Entry_G3, \@Entry_G1);
+    }
 
     # get relation for new entry
-    foreach my $rt_entry (keys(%rt)){
+    foreach my $rt_entry (keys(%frt)){
 	
+	#print "$link -> $rt_entry...\n";
 	my $link_relation;
 	if ($link eq "right") {
 	    $link_relation = get_left_relation($rt_entry);
 	} elsif ($link eq "left") {
 	    $link_relation = get_right_relation($rt_entry);
+	} elsif (($link eq "down") || ($link eq "up")) {
+	    $link_relation = get_left_relation($rt_entry);
 	}
+	#print "$link --> $link_relation\n";
 
 	if ($link_relation =~ /$entry/i) {
-	    foreach my $type_of_entry (@{$rt{$rt_entry}}) {
+	    foreach my $type_of_entry (@{$frt{$rt_entry}}) {
+		#print "$link ---> $type_of_entry\n";
 		my %tmpl_desc;
 		$tmpl_desc{'RT_TYPE'} = $type_of_entry;
 		if ($link eq 'right'){
@@ -293,8 +332,20 @@ sub get_type_for_new_relation {
 		    $tmpl_desc{'RT_NEXT'} = get_left_relation($rt_entry);
 		    $tmpl_desc{'RT_DESC'} = get_right_relation_type_desc($type_of_entry);
 		}
+		#print "$link ----> $tmpl_desc{'RT_NEXT'}\n";
+		#print "$link ----> $tmpl_desc{'RT_DESC'}\n";
 		push(@tmpl_data, \%tmpl_desc);
 	   }
+	}
+	if (($link eq 'down') || ($link eq 'up')) {
+	    foreach my $type_of_entry (@{$frt{$rt_entry}}) {
+		my %tmpl_desc;
+		$tmpl_desc{'RT_NEXT'} = get_left_relation($rt_entry);
+		$tmpl_desc{'RT_DESC'} = get_right_relation_type_desc($type_of_entry);
+		#print "$link ----> $tmpl_desc{'RT_NEXT'}\n";
+		#print "$link ----> $tmpl_desc{'RT_DESC'}\n";
+		push(@tmpl_data, \%tmpl_desc);
+	    }
 	}
     }
     return @tmpl_data;
@@ -460,11 +511,11 @@ sub main {
     }
 
     # relation for G1 (left and rigth)
-    my @left_data = get_type_for_new_relation($current_entry, 'left');
-    $tmpl->param(LEFT_TYPE_DESC_LOOP => \@left_data);
-
     my @right_data = get_type_for_new_relation($current_entry, 'right');
     $tmpl->param(RIGHT_TYPE_DESC_LOOP => \@right_data);
+
+    my @left_data = get_type_for_new_relation($current_entry, 'left');
+    $tmpl->param(LEFT_TYPE_DESC_LOOP => \@left_data);
 
     # get exist relation type and entry
     my @left_entry_link = get_current_relation($dbh, $current_entry, $id, 'left');
@@ -475,17 +526,17 @@ sub main {
 
     # relation for G2 (down)
     my @down_data = get_type_for_new_relation($current_entry, 'down');
-    #$tmpl->param(DOWN_TYPE_DESC_LOOP => \@left_data);
+    $tmpl->param(DOWN_TYPE_DESC_LOOP => \@down_data);
 
     my @down_entry_link = get_current_relation($dbh, $current_entry, $id, 'down');
-    #$tmpl->param(DOWN_ENTRY_LOOP => \@down_entry_link);
+    $tmpl->param(DOWN_ENTRY_LOOP => \@down_entry_link);
 
     # relation for G3 (up)
     my @up_data = get_type_for_new_relation($current_entry, 'up');
-    #$tmpl->param(UP_TYPE_DESC_LOOP => \@up_data);
+    $tmpl->param(UP_TYPE_DESC_LOOP => \@up_data);
 
     my @up_entry_link = get_current_relation($dbh, $current_entry, $id, 'up');
-    #$tmpl->param(UP_ENTRY_LOOP => \@up_entry_link);
+    $tmpl->param(UP_ENTRY_LOOP => \@up_entry_link);
 
     # Database disconnect
     $dbh->disconnect();

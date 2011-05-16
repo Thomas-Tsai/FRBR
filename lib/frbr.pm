@@ -242,11 +242,11 @@ sub get_relation_type {
     
     @{$relation_type{'item-item'}} = ('whole/part', 'reconfiguration', 'reproduction');
     @{$relation_type{'manifestation-menifestation'}} = ('whole/part', 'reproduction', 'alternate');
-    @{$relation_type{'expression-expression'}} = ('whole/part', 'abridgement', 'revision', 'translation', 'arrangement');
+    @{$relation_type{'expression-expression_work2'}} = ('whole/part', 'abridgement', 'revision', 'translation', 'arrangement');
     @{$relation_type{'work-work'}} = ('whole/part', 'successor', 'supplement', 'complement', 'summary', 'adaptation', 'transformation', 'imitation');
     @{$relation_type{'manifestation-item'}} = ('reproduction');
     @{$relation_type{'expression-work'}} = ('successor', 'supplement', 'complement', 'summary', 'adaptation', 'transformation', 'imitation');
-    @{$relation_type{'expression-work-expression'}} = ('successor', 'supplement', 'complement', 'summary', 'adaptation', 'transformation', 'imitation');
+    @{$relation_type{'expression-expression_work'}} = ('successor', 'supplement', 'complement', 'summary', 'adaptation', 'transformation', 'imitation');
     @{$relation_type{'work-expression'}} = ('realize');
     @{$relation_type{'expression-manifestation'}} = ('emboy');
     @{$relation_type{'manifestation-item'}} = ('exemplify');

@@ -163,14 +163,45 @@ ID : <TMPL_VAR NAME="ID"> <br />
 </td>
 <td>
 <table>
-<tr><td rowspan=2>is {owned | produced | realized | created} by</td><td>PERSON</td></tr>
-<tr><td>CORPROATE BODY</td></tr>
+<tr><td>add new author:<TMPL_VAR NAME="type"></td><td>
+<form method=post action=frbr.pl>
+<select name="selected_type">
+<TMPL_LOOP NAME="DOWN_TYPE_DESC_LOOP">
+<option value="<TMPL_VAR NAME="RT_TYPE">:<TMPL_VAR NAME="RT_NEXT">"><TMPL_VAR NAME="RT_DESC">(<TMPL_VAR NAME="RT_NEXT">)</option>
+</TMPL_LOOP>
+</select>
+<input type=hidden name=P_ENTRY value=<TMPL_VAR NAME="ENTRY">>
+<input type=hidden name=P_ID value=<TMPL_VAR NAME="ID">>
+<input type=submit name=RT_CMD value="add">
+</form>
+</td></tr>
+<tr><td>add exist author:</td><td></td></tr>
+<tr><td>current author:</td><td>
+<TMPL_loop NAME="DOWN_ENTRY_LOOP">
+<a href="frbr.pl?entry=<TMPL_VAR NAME="entry">&ID=<TMPL_VAR NAME="id">"><TMPL_VAR NAME="desc"> <TMPL_VAR NAME="title"></a> 
+</TMPL_LOOP>
+</td></tr>
 </table>
 <table>
-<tr><td rowspan=4>has as subject</td><td>CONCEPT</td></tr>
-<tr><td>OBJECT</td></tr>
-<tr><td>EVENT</td></tr>
-<tr><td>PLACE</td></tr>
+<tr><td>add new subject:<TMPL_VAR NAME="type"></td><td>
+<form method=post action=frbr.pl>
+<select name="selected_type">
+<TMPL_LOOP NAME="UP_TYPE_DESC_LOOP">
+<option value="<TMPL_VAR NAME="RT_TYPE">:<TMPL_VAR NAME="RT_NEXT">"><TMPL_VAR NAME="RT_DESC">(<TMPL_VAR NAME="RT_NEXT">)</option>
+</TMPL_LOOP>
+</select>
+<input type=hidden name=P_ENTRY value=<TMPL_VAR NAME="ENTRY">>
+<input type=hidden name=P_ID value=<TMPL_VAR NAME="ID">>
+<input type=submit name=RT_CMD value="add">
+</form>
+</td></tr>
+<tr><td>add exist subject:</td><td></td></tr>
+<tr><td>current subject:</td><td>
+<TMPL_loop NAME="UP_ENTRY_LOOP">
+<a href="frbr.pl?entry=<TMPL_VAR NAME="entry">&ID=<TMPL_VAR NAME="id">"><TMPL_VAR NAME="desc"> <TMPL_VAR NAME="title"></a> 
+</TMPL_LOOP>
+</td></tr>
+</table>
 </table>
 </td>
 </tr>
