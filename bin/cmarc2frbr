@@ -1,0 +1,41 @@
+#!/bin/perl
+use MARC::Batch;
+use MARC::Field;
+use FRBR::CMARC;
+
+# ARGV[-1] marc_file
+my $MARC_FILE = $ARGV[-1];
+my $DEBUG = 0;
+my $total_marc_records = 0;
+
+my %rule_for_cmarc;
+
+# open MARC file
+my $batch = MARC::Batch->new('USMARC', $MARC_FILE);
+$batch->strict_off();
+
+while ( my $record = $batch->next() ){
+    $total_marc_records++;
+    print "\n###Current Records $total_marc_records\n";
+    my @fields = $record->fields();
+    foreach my $field (@fields) {
+	my $tag = $field->tag();
+	print
+	$tag, " ",
+	defined $field->indicator(1) ? $field->indicator(1) : "",
+	defined $field->indicator(2) ? $field->indicator(2) : "",
+	;#" ", $field->as_string(), "\n";
+	next if $tag eq '001';
+	next if $tag eq '005';
+	my @all_subfield = $field->subfields($fields);
+	foreach my $sub_data (@all_subfield){
+	    print "\t${$sub_data}[0] -> ${$sub_data}[1]\n";
+	}
+    }
+}
+
+
+if ( my @warnings = $batch->warnings() && $DEBUG) {
+    print "\nWarnings were detected!\n", @warnings;
+}
+
