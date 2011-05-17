@@ -1,10 +1,11 @@
 Changes
-frbr.xs
+Entry.xs
 Makefile.PL
 MANIFEST
 ppport.h
 README
-t/frbr.t
+t/FRBR-Entry.t
 fallback/const-c.inc
 fallback/const-xs.inc
-lib/frbr.pm
+lib/FRBR/Entry.pm
+lib/FRBR/CMARC.pm

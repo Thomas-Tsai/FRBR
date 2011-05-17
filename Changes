@@ -1,6 +1,6 @@
-Revision history for Perl extension frbr.
+Revision history for Perl extension FRBR::Entry.
 
-0.01  Tue Mar  1 16:34:34 2011
+0.01  Tue May 17 19:53:46 2011
 	- original version; created by h2xs 1.23 with options
-		-n frbr
+		-n FRBR::Entry
 

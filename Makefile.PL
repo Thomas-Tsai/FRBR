@@ -3,12 +3,13 @@ use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 WriteMakefile(
-    NAME              => 'frbr',
-    VERSION_FROM      => 'lib/frbr.pm', # finds $VERSION
+    NAME              => 'FRBR::Entry',
+    VERSION_FROM      => 'lib/FRBR/Entry.pm', # finds $VERSION
     PREREQ_PM         => {}, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM  => 'lib/frbr.pm', # retrieve abstract from module
+      (ABSTRACT_FROM  => 'lib/FRBR/Entry.pm', # retrieve abstract from module
        AUTHOR         => 'thomas <thomas@>') : ()),
+    PMLIBDIRS       => [ qw( lib/ ) ],
     LIBS              => [''], # e.g., '-lm'
     DEFINE            => '', # e.g., '-DHAVE_SOMETHING'
     INC               => '-I.', # e.g., '-I. -I/usr/include/other'
@@ -22,7 +23,7 @@ if  (eval {require ExtUtils::Constant; 1}) {
   # changes.
   my @names = (qw());
   ExtUtils::Constant::WriteConstants(
-                                     NAME         => 'frbr',
+                                     NAME         => 'FRBR::Entry',
                                      NAMES        => \@names,
                                      DEFAULT_TYPE => 'IV',
                                      C_FILE       => 'const-c.inc',

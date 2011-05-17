@@ -40,11 +40,11 @@ my $types = {map {($_, 1)} qw()};
 my @names = (qw());
 
 print constant_types(), "\n"; # macro defs
-foreach (C_constant ("frbr", 'constant', 'IV', $types, undef, 3, @names) ) {
+foreach (C_constant ("FRBR::Entry", 'constant', 'IV', $types, undef, 3, @names) ) {
     print $_, "\n"; # C constant subs
 }
 print "\n#### XS Section:\n";
-print XS_constant ("frbr", $types);
+print XS_constant ("FRBR::Entry", $types);
 __END__
    */
 
