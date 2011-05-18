@@ -1,5 +1,56 @@
 package FRBR::Entry;
 
+=head1 NAME
+
+FRBR::Entry - Perl extension for FRBR Disply
+
+=head1 VERSION
+
+Version 0.0.1
+
+=head1 SYNOPSIS
+
+  use FRBR::Entry;
+
+=head1 DESCRIPTION
+
+Stub documentation for frbr, created by h2xs. It looks like the
+author of the extension was negligent enough to leave the stub
+unedited.
+
+Blah blah blah.
+
+=head2 EXPORT
+
+None by default.
+
+
+
+=head1 SEE ALSO
+
+Mention other useful documentation such as the documentation of
+related modules or operating system documentation (such as man pages
+in UNIX), or any relevant external documentation such as RFCs or
+standards.
+
+If you have a mailing list set up for your module, mention it here.
+
+If you have a web site set up for your module, mention it here.
+
+=head1 AUTHOR
+
+thomas, E<lt>thomas@E<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2011 by thomas
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
+at your option, any later version of Perl 5 you may have available.
+
+
+=cut
 use 5.010000;
 use strict;
 use warnings;
@@ -11,13 +62,6 @@ use AutoLoader;
 
 our @ISA = qw(Exporter);
 
-# Items to export into callers namespace by default. Note: do not export
-# names by default without a very good reason. Use EXPORT_OK instead.
-# Do not simply export all your public functions/methods/constants.
-
-# This allows declaration	use FRBR ':all';
-# If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
-# will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(
 	
 ) ] );
@@ -67,7 +111,7 @@ sub get_work_attrs{
             'other_distinguishing_characteristic' => 'other distinguishing characteristic',
             'intended_termination'                => 'intended termination',
             'intended_audience'                   => 'intended audience',
-            'con_work'                            => 'context for the work',
+            'context_work'                            => 'context for the work',
             'medium_performance_musical_work'     => 'medium of performance, musical work',
             'numeric_designation_musical_work'    => 'numeric designation, musical work',
             'key_musical_work'                    => 'key, musical work',
@@ -331,56 +375,5 @@ sub get_attrs{
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
-
-=head1 NAME
-
-FRBR::Entry - Perl extension for FRBR Disply
-
-=head1 VERSION
-
-Version 0.0.1
-
-=head1 SYNOPSIS
-
-  use FRBR::Entry;
-
-=head1 DESCRIPTION
-
-Stub documentation for frbr, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
 
 
-
-=head1 SEE ALSO
-
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
-
-=head1 AUTHOR
-
-thomas, E<lt>thomas@E<gt>
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2011 by thomas
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.10.0 or,
-at your option, any later version of Perl 5 you may have available.
-
-
-=cut
