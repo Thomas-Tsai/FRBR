@@ -134,7 +134,7 @@ sub get_expression_attrs{
             'revisability_expression'             => 'revisability of expression',
             'extent_expression'                   => 'extent of the expression',
             'summarization_content'               => 'summarization of content',
-            'con_expression'                      => 'context for the expression',
+            'context_expression'                      => 'context for the expression',
             'critical_response_to_expression'     => 'critical response to the expression',
             'use_restrictions_expression'         => 'use restrictions on the expression',
             'sequencing_pattern'                  => 'sequencing pattern (serial)',
