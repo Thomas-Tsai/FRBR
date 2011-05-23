@@ -9,3 +9,6 @@ fallback/const-c.inc
 fallback/const-xs.inc
 lib/FRBR/Entry.pm
 lib/FRBR/CMARC.pm
+lib/FRBR/MARC21.pm
+bin/cmarc2frbr
+bin/marc212frbr
