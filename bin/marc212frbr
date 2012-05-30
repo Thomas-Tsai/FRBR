@@ -1,0 +1,63 @@
+#!/usr/bin/perl -w
+
+use strict;
+use MARC::Batch;
+use MARC::Field;
+use lib "/home/thomas/perl/lib/perl/5.10.0/";
+use FRBR::MARC21;
+
+# ARGV[-1] marc_file
+my $MARC_FILE = $ARGV[-1];
+my $DEBUG = 0;
+my $total_marc_records = 0;
+
+my @Entry_G1 = qw(work expression manifestation item);
+my @Entry_G2 = qw(person corporate_body);             
+my @Entry_G3 = qw(concept object event place);        
+my @Entry = [@Entry_G1, @Entry_G2, @Entry_G3];
+
+# open MARC file
+my $batch = MARC::Batch->new('USMARC', $MARC_FILE);
+$batch->strict_off();
+
+while ( my $record = $batch->next() ){
+    $total_marc_records++;
+    print "\n###Current Records $total_marc_records\n";
+    my @fields = $record->fields();
+    foreach my $field (@fields) {
+	my $tag = $field->tag();
+	print
+	$tag, " ",
+	defined $field->indicator(1) ? $field->indicator(1) : "",
+	defined $field->indicator(2) ? $field->indicator(2) : "",
+	;#" ", $field->as_string(), "\n";
+	next if $tag eq '001';
+	next if $tag eq '005';
+	my @all_subfield = $field->subfields();
+	foreach my $sub_data (@all_subfield){
+	    print "\t${$sub_data}[0] -> ${$sub_data}[1]\n";
+	    my $subtag = ${$sub_data}[0];
+	    my $subdata = ${$sub_data}[1];
+
+	    foreach my $entry (@Entry_G1) {
+		my %rule_for_marc21 = get_attrs_to_marc21($entry);
+		foreach my $entry_attr (keys(%rule_for_marc21)){
+		    #print "--$entry_attr\n";
+		    foreach my $pattern (@{$rule_for_marc21{$entry_attr}}){
+			#print "---$pattern\n";
+			my ($attr_tag, $attr_sub) = split (/\$/,$pattern);
+			if (($attr_tag eq $tag) && ($attr_sub =~ /$subtag/)){
+			    print "\t\t$subdata --> $entry-$entry_attr\n";
+			}
+		    }
+		}
+	    }
+	}
+    }
+}
+
+
+if ( my @warnings = $batch->warnings() && $DEBUG) {
+    print "\nWarnings were detected!\n", @warnings;
+}
+
