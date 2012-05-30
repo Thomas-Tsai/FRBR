@@ -1,0 +1,311 @@
+<!-- TMPL_INCLUDE NAME="doc-head-open.inc" -->
+<!-- TMPL_IF NAME="LibraryNameTitle" --><!-- TMPL_VAR NAME="LibraryNameTitle" --><!-- TMPL_ELSE -->Koha Online<!-- /TMPL_IF --> Catalog &rsaquo; FRBR
+<!-- TMPL_INCLUDE NAME="doc-head-close.inc" -->
+<script src="/opac-tmpl/prog/en/lib/timeline_js/timeline-api.js?bundle=true" type="text/javascript"></script>
+<script src="/opac-tmpl/prog/en/lib/timeline.js" type="text/javascript"></script>
+</head>
+<body onload="onLoad();" onresize="onResize();">
+<!-- TMPL_IF NAME="OpacNav" --><div id="doc3" class="yui-t1"><!-- TMPL_ELSE --><div id="doc3" class="yui-t7"><!-- /TMPL_IF -->
+<div id="bd">
+<!-- TMPL_INCLUDE name="masthead.inc" -->
+
+<div id="yui-main">
+<div class="yui-b"><div class="yui-g">
+<div class="container">
+
+<table border=1>
+<tr>
+<td>
+<a href=opac-frbr.pl?entry=work>
+<TMPL_IF NAME="Work">
+<b>Work</b>
+<TMPL_ELSE>
+Work
+</TMPL_IF>
+</a>
+ | 
+<a href=opac-frbr.pl?entry=expression>
+<TMPL_IF NAME="Expression">
+<b>Expression</b>
+<TMPL_ELSE>
+Expression
+</TMPL_IF>
+</a>
+ | 
+<a href=opac-frbr.pl?entry=manifestation>
+<TMPL_IF NAME="Manifestation">
+<b>Manifestation</b>
+<TMPL_ELSE>
+Manifestation
+</TMPL_IF>
+</a>
+ | 
+<a href=opac-frbr.pl?entry=item>
+<TMPL_IF NAME="Item">
+<b>Item</b>
+<TMPL_ELSE>
+Item
+</TMPL_IF>
+</a>
+ | 
+<a href=opac-frbr.pl?entry=corporate_body>
+<TMPL_IF NAME="Corporate_Body">
+<b>Corporate Body</b>
+<TMPL_ELSE>
+Corporate Body
+</TMPL_IF>
+</a>
+ | 
+<a href=opac-frbr.pl?entry=person>
+<TMPL_IF NAME="Person">
+<b>Person</b>
+<TMPL_ELSE>
+Person
+</TMPL_IF>
+</a>
+ | 
+<a href=opac-frbr.pl?entry=concept>
+<TMPL_IF NAME="Concept">
+<b>Concept</b>
+<TMPL_ELSE>
+Concept
+</TMPL_IF>
+</a>
+ | 
+<a href=opac-frbr.pl?entry=object>
+<TMPL_IF NAME="Object">
+<b>Object</b>
+<TMPL_ELSE>
+Object
+</TMPL_IF>
+</a>
+ | 
+<a href=opac-frbr.pl?entry=event>
+<TMPL_IF NAME="Event">
+<b>Event</b>
+<TMPL_ELSE>
+Event
+</TMPL_IF>
+</a>
+ | 
+<a href=opac-frbr.pl?entry=place>
+<TMPL_IF NAME="Place">
+<b>Place</b>
+<TMPL_ELSE>
+Place
+</TMPL_IF>
+</a>
+</td>
+</tr>
+<tr>
+<td>relation map</td>
+</tr>
+<tr>
+<td>
+<!--entry layer-->
+<table border=1 width=100%>
+<tr>
+<td colspan=2> 
+<TMPL_IF NAME="Work">
+<b>Work</b>
+<TMPL_ELSE>
+Work
+</TMPL_IF>
+<TMPL_IF NAME="Expression">
+<b>Expression</b>
+<TMPL_ELSE>
+Expression
+</TMPL_IF>
+<TMPL_IF NAME="Manifestation">
+<b>Manifestation</b>
+<TMPL_ELSE>
+Manifestation
+</TMPL_IF>
+<TMPL_IF NAME="Item">
+<b>Item</b>
+<TMPL_ELSE>
+Item
+</TMPL_IF>
+</td>
+</tr>
+<tr>
+<!--<td colspan=2>Type: </td>-->
+<td colspan=2>
+<table>
+<!--
+<tr><td>add new relation type:<TMPL_VAR NAME="type"></td><td>
+<form method=post action=opac-frbr.pl>
+<select name="selected_type">
+<TMPL_LOOP NAME="LEFT_TYPE_DESC_LOOP">
+<option value="<TMPL_VAR NAME="RT_TYPE">:<TMPL_VAR NAME="RT_NEXT">"><TMPL_VAR NAME="RT_DESC">(<TMPL_VAR NAME="RT_NEXT">)</option>
+</TMPL_LOOP>
+</select>
+<input type=hidden name=P_ENTRY value=<TMPL_VAR NAME="ENTRY">>
+<input type=hidden name=P_ID value=<TMPL_VAR NAME="ID">>
+<input type=submit name=RT_CMD value="add">
+</form>
+</td></tr>
+<tr><td>add exist relation type:</td><td></td></tr>
+-->
+<tr><td>current relation type:</td><td>
+<TMPL_loop NAME="LEFT_ENTRY_LOOP">
+<a href="opac-frbr.pl?entry=<TMPL_VAR NAME="entry">&ID=<TMPL_VAR NAME="id">"><TMPL_VAR NAME="desc"> <TMPL_VAR NAME="title"></a> <br>
+</TMPL_LOOP>
+</td></tr>
+</table>
+</td>
+</tr>
+</td>
+<td>
+<form method=post action=opac-frbr.pl>
+<input type=hidden value=<TMPL_VAR NAME="ID"> NAME=ID>
+<input type=hidden value=<TMPL_VAR NAME="ENTRY"> NAME=entry>
+<TMPL_IF NAME=tmpl_browse>
+ID : <TMPL_VAR NAME="ID"> <br />
+<TMPL_LOOP NAME="ATTR">
+<TMPL_VAR NAME="entry_attr"> : <TMPL_VAR NAME="entry_attr_value"> <br />
+</TMPL_LOOP>
+</TMPL_IF>
+
+<TMPL_IF NAME=tmpl_edit>
+ID : <TMPL_VAR NAME="ID"> <br />
+<TMPL_LOOP NAME="ATTR">
+<TMPL_IF NAME="__first__">
+<TMPL_VAR NAME="entry_attr"> : <TMPL_VAR NAME="entry_attr_value"> <br />
+</TMPL_IF>
+<TMPL_VAR NAME="entry_attr"> : <input type=text name=<TMPL_VAR NAME="entry_attr"> value='<TMPL_VAR NAME="entry_attr_value">'> <br />
+</TMPL_LOOP>
+</TMPL_IF>
+
+<TMPL_IF NAME=tmpl_create>
+<TMPL_LOOP NAME="ATTR">
+<TMPL_VAR NAME="entry_attr"> : <input type=text name=<TMPL_VAR NAME="entry_attr"> > <br />
+</TMPL_LOOP>
+</TMPL_IF>
+<TMPL_LOOP NAME="command">
+<input type=submit name=CMD value=<TMPL_VAR NAME="CMD">>
+</TMPL_LOOP>
+</form>
+</td>
+<td>
+<table>
+<!--
+<tr><td colspan=2>person or corporate body</td></tr>
+<tr><td>add new: <TMPL_VAR NAME="type"></td><td>
+<form method=post action=opac-frbr.pl>
+<select name="selected_type">
+<TMPL_LOOP NAME="DOWN_TYPE_DESC_LOOP">
+<option value="<TMPL_VAR NAME="RT_TYPE">:<TMPL_VAR NAME="RT_NEXT">"><TMPL_VAR NAME="RT_DESC">(<TMPL_VAR NAME="RT_NEXT">)</option>
+</TMPL_LOOP>
+</select>
+<input type=hidden name=P_ENTRY value=<TMPL_VAR NAME="ENTRY">>
+<input type=hidden name=P_ID value=<TMPL_VAR NAME="ID">>
+<input type=submit name=RT_CMD value="add">
+</form>
+</td></tr>
+<tr><td>add exist: </td><td></td></tr>
+-->
+<tr><td>current entry: </td><td>
+<TMPL_loop NAME="DOWN_ENTRY_LOOP">
+<a href="opac-frbr.pl?entry=<TMPL_VAR NAME="entry">&ID=<TMPL_VAR NAME="id">"><TMPL_VAR NAME="desc"> <TMPL_VAR NAME="title"></a> 
+</TMPL_LOOP>
+</td></tr>
+</table>
+<table>
+<!--
+<tr><td colspan=2>Subject for Concept, Object, Event or Place</td></tr>
+<tr><td>add new: <TMPL_VAR NAME="type"></td><td>
+<form method=post action=opac-frbr.pl>
+<select name="selected_type">
+<TMPL_LOOP NAME="UP_TYPE_DESC_LOOP">
+<option value="<TMPL_VAR NAME="RT_TYPE">:<TMPL_VAR NAME="RT_NEXT">"><TMPL_VAR NAME="RT_DESC">(<TMPL_VAR NAME="RT_NEXT">)</option>
+</TMPL_LOOP>
+</select>
+<input type=hidden name=P_ENTRY value=<TMPL_VAR NAME="ENTRY">>
+<input type=hidden name=P_ID value=<TMPL_VAR NAME="ID">>
+<input type=submit name=RT_CMD value="add">
+</form>
+</td></tr>
+<tr><td>add exist: </td><td></td></tr>
+-->
+<tr><td>current subject: </td><td>
+<TMPL_loop NAME="UP_ENTRY_LOOP">
+<a href="opac-frbr.pl?entry=<TMPL_VAR NAME="entry">&ID=<TMPL_VAR NAME="id">"><TMPL_VAR NAME="desc"> <TMPL_VAR NAME="title"></a> 
+</TMPL_LOOP>
+</td></tr>
+</table>
+</table>
+</td>
+</tr>
+<tr>
+<td colspan=2>
+<table>
+<!--
+<tr><td>add new relation type:<TMPL_VAR NAME="type"></td><td>
+<form method=post action=opac-frbr.pl>
+<select name="selected_type">
+<TMPL_LOOP NAME="RIGHT_TYPE_DESC_LOOP">
+<option value="<TMPL_VAR NAME="RT_TYPE">:<TMPL_VAR NAME="RT_NEXT">"><TMPL_VAR NAME="RT_DESC">(<TMPL_VAR NAME="RT_NEXT">)</option>
+</TMPL_LOOP>
+</select>
+<input type=hidden name=P_ENTRY value=<TMPL_VAR NAME="ENTRY">>
+<input type=hidden name=P_ID value=<TMPL_VAR NAME="ID">>
+<input type=submit name=RT_CMD value="add">
+</form>
+</td></tr>
+<tr><td>add exist relation type:</td><td></td></tr>
+-->
+<tr><td>current relation type:</td><td>
+<TMPL_loop NAME="RIGHT_ENTRY_LOOP">
+<a href="opac-frbr.pl?entry=<TMPL_VAR NAME="entry">&ID=<TMPL_VAR NAME="id">"><TMPL_VAR NAME="desc"> <TMPL_VAR NAME="title"></a> <br>
+</TMPL_LOOP>
+</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td colspan=2>
+<TMPL_IF NAME="Work">
+<b>Work</b>
+<TMPL_ELSE>
+Work
+</TMPL_IF>
+<TMPL_IF NAME="Work">
+<b>Expression</b>
+<TMPL_ELSE>
+Expression
+</TMPL_IF>
+<TMPL_IF NAME="Expression">
+<b>Manifestation</b>
+<TMPL_ELSE>
+Manifestation
+</TMPL_IF>
+<TMPL_IF NAME="Manifestation">
+<b>Item</b>
+<TMPL_ELSE>
+Item
+</TMPL_IF>
+</td>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<div id="my-timeline" style="height: 150px; border: 1px solid #aaa"></div>
+<noscript>
+This page uses Javascript to show you a Timeline. Please enable Javascript in your browser to see the full page. Thank you.
+</noscript>
+
+</div>
+</div>
+</div>
+</div>
+<!-- TMPL_IF NAME="OpacNav" -->
+<div class="yui-b">
+<div class="container">
+<!--TMPL_INCLUDE NAME="navigation.inc" -->
+</div>
+</div><!-- /TMPL_IF -->
+</div>
+<!-- TMPL_INCLUDE NAME="opac-bottom.inc" -->

@@ -24,6 +24,8 @@ while ( my $record = $batch->next() ){
     $total_marc_records++;
     print "\n###Current Records $total_marc_records\n";
     my @fields = $record->fields();
+    my $total_unmap = 0;
+    my $total_subtag = 0;
     foreach my $field (@fields) {
 	my $tag = $field->tag();
 	print
@@ -35,9 +37,11 @@ while ( my $record = $batch->next() ){
 	next if $tag eq '005';
 	my @all_subfield = $field->subfields();
 	foreach my $sub_data (@all_subfield){
-	    print "\t${$sub_data}[0] -> ${$sub_data}[1]\n";
+	    my $unmap=0;
+	    print "\t${$sub_data}[0] -> ${$sub_data}[1]";
 	    my $subtag = ${$sub_data}[0];
 	    my $subdata = ${$sub_data}[1];
+	    $total_subtag++;
 
 	    foreach my $entry (@Entry_G1) {
 		my %rule_for_cmarc = get_attrs_to_cmarc($entry);
@@ -47,13 +51,20 @@ while ( my $record = $batch->next() ){
 			#print "---$pattern\n";
 			my ($attr_tag, $attr_sub) = split (/\$/,$pattern);
 			if (($attr_tag eq $tag) && ($attr_sub =~ /$subtag/)){
-			    print "\t\t$subdata --> $entry-$entry_attr\n";
+			    print " <- $entry-$entry_attr";
+			    $unmap = 1;
+			} else {
 			}
 		    }
 		}
 	    }
+	    print "\n";
+	    if ($unmap == 0){
+		$total_unmap++;
+	    }
 	}
     }
+    print "unmap $total_unmap / $total_subtag\n";
 }
 
 

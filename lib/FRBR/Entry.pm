@@ -259,7 +259,7 @@ sub get_relation_type_desc {
     @{$relation_type_desc{'translation'}}        = ('has a translation', 'a translation of ');
     @{$relation_type_desc{'arrangement'}}        = ('has an arrangement', 'an arrangement of ');
     @{$relation_type_desc{'successor'}}          = ('has a successor', 'a successor to');
-    @{$relation_type_desc{'supplement'}}         = ('has a supplement', 'supplements ');
+    @{$relation_type_desc{'supplement'}}         = ('has a supplement', 'a supplement to');
     @{$relation_type_desc{'complement'}}         = ('has a complement', 'complements');
     @{$relation_type_desc{'summary'}}            = ('has a summary', 'a summary of ');
     @{$relation_type_desc{'adaptation'}}         = ('has adaptation', 'an adaptation of');
