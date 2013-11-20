@@ -1,10 +1,11 @@
 #!/usr/bin/perl -w
 
-use strict;
+#use strict;
 use MARC::Batch;
 use MARC::Field;
 use lib "/home/thomas/perl/lib/perl/5.10.0/";
 use FRBR::CMARC;
+use Data::Dumper;
 
 # ARGV[-1] marc_file
 my $MARC_FILE = $ARGV[-1];
@@ -16,9 +17,155 @@ my @Entry_G2 = qw(person corporate_body);
 my @Entry_G3 = qw(concept object event place);        
 my @Entry = [@Entry_G1, @Entry_G2, @Entry_G3];
 
+# 資料代碼
+
+my @code_data = qw(100$a 105$a);
+my @code_100a = qw("0,8,n/p" "8,1,n/p" "9,4,date_publication_distribution" "13,4,date_publication_distribution" "17,3,intended_audience" "20,1,manifestation_identifier" "21,1,n/p" "22,3,n/p" "25,1,manifestation_identifier" "26,4,manifestation_identifier" "30,4,manifestation_identifier" "34,1,language_expression");
+my %code_100adesc = ('17' => {
+			'a' => '青少年',
+			'b' => '0-5歲',
+			'c' => '5-10歲',
+			'd' => '9-14歲',
+			'e' => '14-20歲',
+			'k' => '成人 學術性',
+			'm' => '成人 一般性',
+			'u' => '不詳',
+			'z' => '特殊使用者',
+			},
+		    '20' => {
+			'a' => '中央機構',
+			'b' => '地方機構',
+			'f' => '國際組織',
+			'u' => '不詳',
+			'y' => '非政府出版品',
+		    },
+		    '25' => {
+			'a' => '國際標準組織音譯法',
+			'b' => '偉傑士羅馬拼音系統',
+			'c' => '多種音譯法',
+			'p' => '漢語拼音系統',
+			'y' => '無音譯',
+			'z' => '其他',
+		    },
+		    '26' => {
+			'01' => 'ISO 646 basic latin set',
+			'02' => 'ISO Registration basic cyrillic set',
+			'03' => 'ISO 5426 extended latin set',
+			'04' => 'ISO DIS 5427 extended cyrillic set',
+			'05' => 'ISO greek set',
+			'06' => 'ISO 6438 african coded charset set',
+			'08' => 'BIG5 中文字集',
+			'09' => 'CCCII 中文字集',
+		    },
+		    '30' => {
+			'01' => 'ISO 646 basic latin set',
+			'02' => 'ISO Registration basic cyrillic set',
+			'03' => 'ISO 5426 extended latin set',
+			'04' => 'ISO DIS 5427 extended cyrillic set',
+			'05' => 'ISO greek set',
+			'06' => 'ISO 6438 african coded charset set',
+			'08' => 'BIG5 中文字集',
+			'09' => 'CCCII 中文字集',
+		    },
+		    '34' => {
+			'a' => '拉丁文',
+			'b' => '其他拉丁語系',
+			'c' => '斯拉夫語文',
+			'd' => '日文',
+			'e' => '中文',
+			'f' => '阿拉伯文',
+			'g' => '希臘文',
+			'h' => '希伯來文',
+			'i' => '泰文',
+			'k' => '樊文',
+			'k' => '韓文',
+			'l' => '塔米爾文',
+			'z' => '其他',
+		    },
+		);
+
+my @code_105a = qw("0,4,form_work" "4,4,form_expression" "8,1,other_distinguishing_characteristic" "9,1,intended_termination" "10,1,form_work" "11,1,form_work" "12,1,form_work");
+my %code_105adesc = ('0' => {
+                        'a' => '插圖',
+			'b' => '地圖',
+			'c' => '肖像',
+			'd' => '航行圖',
+			'e' => '設計圖',
+			'f' => '圖版',
+			'g' => '樂譜',
+			'h' => '影抄 書影',
+			'i' => '徽章',
+			'j' => '譜系表',
+			'k' => '表格',
+			'l' => '樣本',
+			'm' => '錄音資料',
+			'n' => '透明圖片',
+			'o' => '文搞修飾圖',
+			'p' => '照片',
+			'y' => '無插圖',
+			'z' => '其他',
+			},
+		    '4' => {
+			'a' => '書目',
+			'b' => '目錄',
+			'c' => '索引',
+			'd' => '摘要',
+			'e' => '字典',
+			'f' => '百科全書',
+			'g' => '名錄指南',
+			'i' => '統計資料',
+			'j' => '編序教材',
+			'k' => '專利',
+			'l' => '技術規範',
+			'm' => '學位論文',
+			'o' => '數值表',
+			'p' => '技術報告',
+			'q' => '試題',
+			'r' => '文獻評析',
+			's' => '條約',
+			't' => '漫畫',
+			'z' => '其他',
+			},
+		    '8' => {
+			'0' => '非會議資料',
+			'1' => '會議資料',
+			},
+		    '9' => {
+			'0' => '非紀念集',
+			'1' => '紀念集',
+			},
+		    '10' => {
+			'0' => '無索引',
+			'1' => '有索引',
+			},
+		    '11' => {
+			'a' => '小說',
+			'b' => '戲劇',
+			'c' => '散文',
+			'd' => '幽默及諷刺小品',
+			'e' => '書信',
+			'f' => '短篇故事',
+			'g' => '詩詞',
+			'h' => '演說搞',
+			'y' => '非文學作品',
+			'z' => '其他',
+			},
+		    '12' => {
+			'a' => '自傳',
+			'b' => '分傳',
+			'c' => '總傳',
+			'd' => '含傳記資料',
+			'y' => '非傳記作品',
+			},
+		    );
+
+#print Dumper( $code_100adesc{'17'}{'m'} );
+#exit;
+
 # open MARC file
 my $batch = MARC::Batch->new('USMARC', $MARC_FILE);
 $batch->strict_off();
+
 
 while ( my $record = $batch->next() ){
     $total_marc_records++;
@@ -59,6 +206,47 @@ while ( my $record = $batch->next() ){
 		}
 	    }
 	    print "\n";
+
+	    #100a
+	    if (($tag eq "100") && ($subtag eq "a")){
+		foreach my $m100subtags (@code_100a){
+		    $m100subtags =~ s/"//g;
+		    my ($start, $count, $fr) = split(/,/, $m100subtags);
+		    #print "start $start count $count fr $fr";
+		    my $code = substr($subdata, $start, $count);
+		    $code =~ s/ //g;
+		    #print " code".$code."code";
+		    my $desc = "";
+		    if (exists $code_100adesc{$start}{$code}) {
+			#print Dumper( keys($code_100adesc{$start}) );
+			$desc = $code_100adesc{$start}{$code};
+		    	#print "DESC $desc\t";
+		    }
+		    print "\t" . $desc . " " . $code . "\t<--" . $fr . "\n";
+
+		}
+	    }
+
+	    #105a
+	    if (($tag eq "105") && ($subtag eq "a")){
+		foreach my $m105subtags (@code_105a){
+		    $m105subtags =~ s/"//g;
+		    my ($start, $count, $fr) = split(/,/, $m105subtags);
+		    #print "start $start count $count fr $fr";
+		    my $code = substr($subdata, $start, $count);
+		    $code =~ s/ //g;
+		    #print " code".$code."code";
+		    my $desc = "";
+		    if (exists $code_105adesc{$start}{$code}) {
+			#print Dumper( keys($code_105adesc{$start}) );
+			$desc = $code_105adesc{$start}{$code};
+		    	#print "DESC $desc\t";
+		    }
+		    print "\t" . $desc . " " . $code . "\t<--" . $fr . "\n";
+
+		}
+	    }
+
 	    if ($unmap == 0){
 		$total_unmap++;
 	    }

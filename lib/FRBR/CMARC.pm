@@ -33,6 +33,7 @@ sub get_work_attrs_to_cmarc {
 	'other_distinguishing_characteristic' => [ qw(500$q 500$r 501$r 600$q 601$q 605$q 700$q 702$q 710$q 712$q 750$q 752$q 760$q 
 						    762$q) ],
 	'intended_termination'		      => [ qw(110$a) ],
+	'intended_audience'		      => [ qw(100$a) ],
 	'context_work'			      => [ qw(122$a 660$a 661$a) ],
 	'medium_performance_musical_work'     => [ qw(128$b 500$j 501$j 700$j 702$j 750$j 752$j 760$j 762$j) ],
 	'numeric_designation_musical_work'    => [ qw(500$o 501$o 600$o 601$o 605$o 700$o 702$o 710$o 712$o 750$o 752$o 760$o
@@ -49,7 +50,7 @@ sub get_expression_attrs_to_cmarc{
     %Expression_Attrs_to_cmarc = (
 	    'title_expression'			  => [ qw(200$d) ],
             'form_expression'                     => [ qw(105$a 106$a 115$a 230$a) ],
-            'language_expression'                 => [ qw(100$a 101$abcdefghij 200$z 225$z 500$m 501$m 505$z 510$z 512$z 513$z 514$z 515$z 516$z 517$z 521$z 522$z 523$z 524$z 525$z 526$z 527$z 530$z 531$z 534$z 535$z 536$z 540$z 541$z 544$z 545$z 546$z 547$z 548$z 552$z 553$z 600$m 601$m 605$m 700$m 702$m 710$m 712$m 750$m 752$m 760$m 762$m) ],
+            'language_expression'                 => [ qw(100$a 102$abcdefghij 200$z 225$z 500$m 501$m 505$z 510$z 512$z 513$z 514$z 515$z 516$z 517$z 521$z 522$z 523$z 524$z 525$z 526$z 527$z 530$z 531$z 534$z 535$z 536$z 540$z 541$z 544$z 545$z 546$z 547$z 548$z 552$z 553$z 600$m 601$m 605$m 700$m 702$m 710$m 712$m 750$m 752$m 760$m 762$m) ],
             'other_distinguishing_characteristic' => [ qw(500$nw 501$w 600$w 601$w 605$w 700$w 702$w 710$w 712$w 750$w 752$w 760$w 762$w) ],
             'extent_expression'                   => [ qw(115$a) ],
             'summarization_content'               => [ qw(330$a) ],
